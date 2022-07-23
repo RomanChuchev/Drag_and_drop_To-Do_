@@ -1,13 +1,11 @@
 let todoArray = []
 let key = 'To-Do-1'
 
-
 const input = document.getElementById('input')
 const button = document.getElementById('button')
 const startPlaceholder = document.getElementById('placeholder-start')
-
-// DEBUG
-disabledButton()
+const progressPlaceholder = document.getElementById('placeholder-progress')
+const donePlaceholder = document.getElementById('placeholder-done')
 
 function disabledButton() {
     button.disabled = !input.value.length
@@ -16,12 +14,9 @@ function disabledButton() {
     })
 }
 
-
-
-
 function createTodoApp() {
-
-    // Чтобы дела не исчезали при обновлении. Сделать проверку, если в Local storage уже есть объекты, то нужно из отрисовывать.
+    disabledButton()
+        // Чтобы дела не исчезали при обновлении. Сделать проверку, если в Local storage уже есть объекты, то нужно из отрисовывать.
     if (localStorage.getItem(key)) {
         todoArray = JSON.parse(localStorage.getItem(key))
 
@@ -31,6 +26,7 @@ function createTodoApp() {
 
             todoItem.textContent = obj.name;
             todoItem.id = obj.id
+            added(todoItem)
         }
     }
 
@@ -38,39 +34,37 @@ function createTodoApp() {
         e.preventDefault()
 
         const todoItem = createTodoItem(input.value)
-        console.log(todoItem);
-
+        added(todoItem)
         if (!input.value) {
             return
         }
         createLocalStorage(todoItem)
-
-
-        function createLocalStorage(form) {
-            let localStorageData = localStorage.getItem(key)
-            if (localStorageData == null) {
-                todoArray = []
-            } else {
-                todoArray = JSON.parse(localStorageData)
-            }
-
-            const createItemObj = arr => {
-                const itemObj = {}
-
-                itemObj.name = form.textContent
-                itemObj.id = form.id
-
-                arr.push(itemObj)
-            }
-
-            createItemObj(todoArray)
-
-            localStorage.setItem(key, JSON.stringify(todoArray))
-        }
-        input.value = ''
+        dragAndDrop()
     })
-    disabledButton()
     dragAndDrop()
+}
+
+function createLocalStorage(form) {
+    let localStorageData = localStorage.getItem(key)
+    if (localStorageData == null) {
+        todoArray = []
+    } else {
+        todoArray = JSON.parse(localStorageData)
+    }
+
+    const createItemObj = arr => {
+        const itemObj = {}
+
+        itemObj.name = form.textContent
+        itemObj.id = form.id
+
+        arr.push(itemObj)
+    }
+    createItemObj(todoArray)
+    input.value = ''
+    disabledButton()
+
+    localStorage.setItem(key, JSON.stringify(todoArray))
 }
 
 function createTodoItem(value) {
@@ -80,14 +74,21 @@ function createTodoItem(value) {
 
     todoItemForm.textContent = value
 
-    const randomId = Math.round(Math.random() * (999 - 100) + 100)
-    todoItemForm.id = randomId
-
-    startPlaceholder.append(todoItemForm)
+    todoItemForm.id = changePlaseholder()
 
     return todoItemForm
 }
 
+function added(todoItemForm) {
+    if (todoItemForm.id === 'start' || todoItemForm.id === 'undefined') {
+        startPlaceholder.append(todoItemForm)
+    } else if (todoItemForm.id === 'progress') {
+        progressPlaceholder.append(todoItemForm)
+    } else if (todoItemForm.id === 'start') {
+        donePlaceholder.append(todoItemForm)
+    } else startPlaceholder.append(todoItemForm)
+
+}
 
 function dragAndDrop() {
     const items = document.querySelectorAll('.item')
@@ -135,6 +136,7 @@ function dragAndDrop() {
                         activeItem[0].classList.remove('active')
                     }
                 }
+                changePlaseholder()
             }
         }
 
@@ -142,4 +144,24 @@ function dragAndDrop() {
             event.target.classList.remove('hold', 'hide')
         }
     }
+}
+
+function changePlaseholder() {
+
+    const items = document.querySelectorAll('.item')
+    let itemId = 'start'
+    for (const item of items) {
+        if (item.parentNode.id === 'placeholder-start') {
+            item.id = 'start'
+            itemId = 'start'
+        } else if (item.parentNode.id === 'placeholder-progress') {
+            item.id = 'progress'
+            itemId = 'progress'
+
+        } else if (item.parentNode.id === 'placeholder-done') {
+            item.id = 'done'
+            itemId = 'done'
+        }
+    }
+    return itemId
 }
