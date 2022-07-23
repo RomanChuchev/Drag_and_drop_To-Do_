@@ -5,19 +5,23 @@
 
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: #e5e5e5;
+    background: url('https://images.unsplash.com/photo-1532153955177-f59af40d6472?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1887&q=80');
+    padding-top: 3rem;
+}
+
+.container-main {
     display: flex;
-    padding-top: 5rem;
     justify-content: center;
     overflow: hidden;
     margin: 0;
+    text-align: center;
 }
 
-.row {
+.line {
     display: flex;
-    width: 800px;
+    width: 900px;
     justify-content: space-between;
-    margin-bottom: 1rem;
+    margin-bottom: 5px;
 }
 
 .col-header {
@@ -26,63 +30,71 @@ body {
     border-radius: 20px;
     padding: 0.8rem 1rem;
     color: #fff;
-    text-align: center;
 }
 
 .item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 66px;
+    width: 200px;
+    border: 1px solid #eee;
     box-shadow: 4px 4px 9px rgba(198, 198, 198, 0.36);
     border-radius: 20px;
     background: #f7f6f7;
     padding: 0.8rem 1rem;
-    color: #fff;
+    color: #828282;
     text-align: center;
     cursor: grab;
-    user-select: none;
-    margin: .5rem 0;
+    margin: 3px;
 }
 
 .item:active {
     cursor: grabbing;
 }
 
-.item.hide {
+.placeholder {
+    width: 200px;
+    height: 100ch;
+}
+
+@media (max-width: 800px) {
+    .placeholder {
+        width: 150px;
+    }
+    .item {
+        width: 150px;
+    }
+    .col-header {
+        width: 150px;
+    }
+    .line {
+        width: 500px;
+    }
+}
+
+.start-bg {
+    background: linear-gradient(90deg, #00ff26, #eefb00);
+}
+
+.progress-bg {
+    background: linear-gradient(90deg, #e1ff00, #ffae00);
+}
+
+.done-bg {
+    background: linear-gradient(90deg, #ff8400, #ff0000);
+}
+
+.hold {
+    background: white;
+    color: black;
+    font-weight: 400;
+}
+
+.hide {
     display: none;
 }
 
-.item.hold {
-    border: 3px solid #ccc;
+.hovered {
+    border-top: 2px solid rgb(0, 238, 255);
 }
 
-.item:first-of-type {
-    margin-top: 0;
-}
-
-.item:last-of-type {
-    margin-bottom: 0;
-}
-
-.placeholder {
-    width: 200px;
-}
-
-.placeholder.hovered {
-    background-color: #ccc;
-    box-shadow: 0 0 10px 10px #ccc;
-    border-radius: 20px;
-}
-
-.start {
-    background: linear-gradient(90deg, #ff85e4 0%, #229efd 179.25%);
-}
-
-.progress {
-    background: linear-gradient(90deg, #209cff 0%, #68e0cf 100%);
-}
-
-.done {
-    background: linear-gradient(90deg, #84fab0 0%, #8fd3f4 100%);
+.active {
+    border: 2px solid black;
 }

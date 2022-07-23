@@ -1,48 +1,145 @@
-const placeholders = document.querySelectorAll(".placeholder");
-const classes = ["start", "progress", "done"];
+let todoArray = []
+let key = 'To-Do-1'
 
-function dragItem(e) {
-    if (!e.target.closest(".item")) return;
-    e.target.classList.toggle("hold");
-    setTimeout(() => e.target.classList.toggle("hide"), 0);
-    placeholderHeight();
+
+const input = document.getElementById('input')
+const button = document.getElementById('button')
+const startPlaceholder = document.getElementById('placeholder-start')
+
+// DEBUG
+disabledButton()
+
+function disabledButton() {
+    button.disabled = !input.value.length
+    input.addEventListener('input', () => {
+        button.disabled = !input.value.length
+    })
 }
 
-function dragOverPlaceholder(e) {
-    let el = e.target.closest(".placeholder");
-    if (!el) return;
 
-    el.classList.toggle("hovered", !el.classList.contains("hovered"));
+
+
+function createTodoApp() {
+
+    // Чтобы дела не исчезали при обновлении. Сделать проверку, если в Local storage уже есть объекты, то нужно из отрисовывать.
+    if (localStorage.getItem(key)) {
+        todoArray = JSON.parse(localStorage.getItem(key))
+
+        // Проходимся по массиву с объектами
+        for (const obj of todoArray) {
+            const todoItem = createTodoItem(input.value)
+
+            todoItem.textContent = obj.name;
+            todoItem.id = obj.id
+        }
+    }
+
+    button.addEventListener('click', (e) => {
+        e.preventDefault()
+
+        const todoItem = createTodoItem(input.value)
+        console.log(todoItem);
+
+        if (!input.value) {
+            return
+        }
+        createLocalStorage(todoItem)
+
+
+        function createLocalStorage(form) {
+            let localStorageData = localStorage.getItem(key)
+            if (localStorageData == null) {
+                todoArray = []
+            } else {
+                todoArray = JSON.parse(localStorageData)
+            }
+
+            const createItemObj = arr => {
+                const itemObj = {}
+
+                itemObj.name = form.textContent
+                itemObj.id = form.id
+
+                arr.push(itemObj)
+            }
+
+            createItemObj(todoArray)
+
+            localStorage.setItem(key, JSON.stringify(todoArray))
+        }
+        input.value = ''
+    })
+    disabledButton()
+    dragAndDrop()
 }
 
-function drop(e) {
-    let el = e.target.closest(".placeholder");
-    if (!el) return;
-    let item = document.querySelector(".hold");
-    el.append(item);
-    toggleProgress(el);
-    el.classList.remove("hovered");
+function createTodoItem(value) {
+    const todoItemForm = document.createElement('div')
+    todoItemForm.classList.add('item')
+    todoItemForm.draggable = "true"
+
+    todoItemForm.textContent = value
+
+    const randomId = Math.round(Math.random() * (999 - 100) + 100)
+    todoItemForm.id = randomId
+
+    startPlaceholder.append(todoItemForm)
+
+    return todoItemForm
 }
 
-function toggleProgress(placeholder) {
-    let i = Array.from(placeholders).findIndex(el => el === placeholder);
-    placeholder.querySelectorAll(".item").forEach(el => {
-        el.classList.remove(...classes);
-        el.classList.add(classes[i]);
-    });
-}
 
-function placeholderHeight() {
-    placeholders.forEach(el => {
-        let countItems = el.querySelectorAll(".item:not(.hold)").length;
-        el.style.height = `${ (countItems) * 74 + 66 }px`;
-    });
-}
+function dragAndDrop() {
+    const items = document.querySelectorAll('.item')
+    const placeholders = document.querySelectorAll('.placeholder')
 
-document.addEventListener("dragstart", dragItem);
-document.addEventListener("dragend", dragItem);
-document.addEventListener("dragover", (e) => e.preventDefault());
-document.addEventListener("dragenter", dragOverPlaceholder);
-document.addEventListener("dragleave", dragOverPlaceholder);
-document.addEventListener("drop", drop);
-placeholderHeight();
+    for (const item of items) {
+        item.addEventListener('dragstart', dragstart)
+        item.addEventListener('dragend', dragend)
+
+        function dragstart(event) {
+            event.target.classList.add('hold')
+            event.target.classList.add('active')
+            setTimeout(() => event.target.classList.add('hide'), 0)
+
+            for (const placeholder of placeholders) {
+                placeholder.addEventListener('dragover', dragover)
+                placeholder.addEventListener('dragenter', dragenter)
+                placeholder.addEventListener('dragleave', dragleave)
+                placeholder.addEventListener('drop', dragdrop)
+            }
+
+            function dragover(event) {
+                event.preventDefault()
+            }
+
+            function dragenter(event) {
+                event.target.classList.add('hovered')
+            }
+
+            function dragleave(event) {
+                event.target.classList.remove('hovered')
+            }
+
+            function dragdrop(event) {
+
+                activeItem = Array.from(document.getElementsByClassName('active'))
+                if (activeItem[0] === item) {
+                    if (event.target.classList.contains('item')) {
+                        event.target.parentNode.append(item)
+                        event.target.classList.remove('hovered')
+                        activeItem[0].classList.remove('active')
+                    } else {
+                        event.target.append(item)
+                        event.target.classList.remove('hovered')
+                        activeItem[0].classList.remove('active')
+                    }
+                }
+            }
+        }
+
+        function dragend(event) {
+            event.target.classList.remove('hold', 'hide')
+        }
+    }
+}
